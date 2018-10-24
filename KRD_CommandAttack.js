@@ -15,7 +15,7 @@
 
 /*:ja
  * @plugindesc 攻撃コマンドの対象選択をスキルに合ったものにします。
- * @author krd_data
+ * @author KRD_DATA (くろうど)
  *
  * @help このプラグインには、プラグインコマンドはありません。
  */
