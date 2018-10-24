@@ -1,21 +1,45 @@
 //================================================
-// Krd_UI_Portrait.js
+// KRD_UI_Portrait.js
 //
-// Copyright (c) 2016 krd_data
+// Copyright (c) 2016 KRD_DATA (くろうど)
 // This is under the MIT License.
 // https://opensource.org/licenses/mit-license.php
 //================================================
 
 /*:
- * @plugindesc UI set for SmartPhone (Portrait).
- * @author krd_data
+ * @plugindesc UI set for SmartPhone (Portrait). 2018/10/24 update.
+ * @author KRD_DATA (くろうど)
+ *
+ * @param ParamCount
+ * @desc Number of parameters.
+ * @default 6
+ *
+ * @param EquipCount
+ * @desc Number of equipment types.
+ * @default 5
+ *
+ * @param ActorCommandRows
+ * @desc The rows of actor command in battle.
+ * @default 2
  *
  * @help This plugin can change UI for SmartPhone (Portrait).
  */
 
 /*:ja
- * @plugindesc スマホ縦長画面用UI詰め合わせ。
- * @author krd_data
+ * @plugindesc スマホ縦長画面用UI詰め合わせ。2018/10/24 更新。
+ * @author KRD_DATA (くろうど)
+ * 
+ * @param ParamCount
+ * @desc 能力値の項目数
+ * @default 6
+ *
+ * @param EquipCount
+ * @desc 装備タイプの数
+ * @default 5
+ *
+ * @param ActorCommandRows
+ * @desc 戦闘時のアクターコマンドの行数
+ * @default 2
  *
  * @help このプラグインは、UIをスマホの縦長画面用（ポートレート）に変更できます。
  */
@@ -24,25 +48,27 @@
 
 'use strict';
 
-// -----------------------------------------------
+var parameters = PluginManager.parameters('KRD_UI_Portrait');
+var paramCount = Number(parameters['ParamCount'] || 6);
+var equipCount = Number(parameters['EquipCount'] || 5);
+var actorCommandRows = Number(parameters['ActorCommandRows'] || 2);
+
+//================================================
 // Title
-// -----------------------------------------------
 
 Window_TitleCommand.prototype.lineHeight = function() {
     return 36 + 30;
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Menu
-// -----------------------------------------------
 
-var _Scene_Menu_create = Scene_Menu.prototype.create;
+var KRD_Scene_Menu_create = Scene_Menu.prototype.create;
 Scene_Menu.prototype.create = function() {
-    _Scene_Menu_create.call(this);
+    KRD_Scene_Menu_create.call(this);
     this._statusWindow.x = 0;
     this._statusWindow.y = this._commandWindow.height;
-    this._goldWindow.x = Graphics.boxWidth - this._goldWindow.width;
+    this._goldWindow.x = 0;
 };
 
 Window_MenuCommand.prototype.windowWidth = function() {
@@ -56,7 +82,6 @@ Window_MenuCommand.prototype.maxCols = function() {
 Window_MenuCommand.prototype.numVisibleRows = function() {
     return 2;
 };
-
 
 Window_Command.prototype.itemTextAlign = function() {
     return 'center';
@@ -74,14 +99,11 @@ Window_MenuCommand.prototype.drawText = function(text, x, y, maxWidth, align) {
     this.contents.drawText(text, x, y, maxWidth, this.lineHeight() * 2, align);
 };
 
-
 Window_MenuStatus.prototype.windowWidth = function() {
     return Graphics.boxWidth;
 };
 
 Window_MenuStatus.prototype.windowHeight = function() {
-//    var h1 = this.fittingHeight(1);
-//    var h2 = this.fittingHeight(2);
     var h1 = Window_MenuCommand.prototype.windowHeight();
     var h2 = Window_Gold.prototype.windowHeight();
     return Graphics.boxHeight - h1 - h2;
@@ -103,37 +125,33 @@ Window_MenuStatus.prototype.drawItemImage = function(index) {
     this.changePaintOpacity(true);
 };
 
-
 Window_Base.prototype.drawActorSimpleStatus = function(actor, x, y, width) {
     var lineHeight = this.lineHeight();
-    var x2 = x + 180;
-    var width2 = Math.min(200, width - 180 - this.textPadding());
+    var x2 = x + 200;
+    var width2 = Math.min(200, width - 200 - this.textPadding());
     this.drawActorName(actor, x, y);
     this.drawActorClass(actor, x, y + lineHeight * 1);
     this.drawActorLevel(actor, x, y + lineHeight * 2);
     this.drawActorIcons(actor, x, y + lineHeight * 2);
     this.drawActorHp(actor, x2, y, width2);
     this.drawActorMp(actor, x2, y + lineHeight * 1, width2);
-    this.drawActorTp(actor, x2, y + lineHeight * 2, width2);
+    if ($dataSystem.optDisplayTp) {
+        this.drawActorTp(actor, x2, y + lineHeight * 2, width2);
+    }
 };
 
-
-var _Window_MenuActor_initialize = Window_MenuActor.prototype.initialize;
+var KRD_Window_MenuActor_initialize = Window_MenuActor.prototype.initialize;
 Window_MenuActor.prototype.initialize = function() {
-    _Window_MenuActor_initialize.call(this);
-//    this.y = this.fittingHeight(2);
+    KRD_Window_MenuActor_initialize.call(this);
     this.y = Window_MenuCommand.prototype.windowHeight();
 };
-
 
 Window_MenuStatus.prototype.standardPadding = function() {
     return 18 + 12;
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Item
-// -----------------------------------------------
 
 Window_ItemList.prototype.lineHeight = function() {
     return 36 + 30;
@@ -143,15 +161,12 @@ Window_ItemCategory.prototype.lineHeight = function() {
     return 36 + 24;
 };
 
-
 Window_ItemList.prototype.standardPadding = function() {
     return 18 + 24;
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Skill
-// -----------------------------------------------
 
 Window_SkillList.prototype.lineHeight = function() {
     return 36 + 30;
@@ -188,15 +203,12 @@ Window_SkillType.prototype.numVisibleRows = function() {
 	return 2;
 };
 
-
 Window_SkillList.prototype.standardPadding = function() {
     return 18 + 24;
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Equip
-// -----------------------------------------------
 
 Window_EquipCommand.prototype.lineHeight = function() {
     return 36 + 16;
@@ -241,12 +253,10 @@ Window_EquipSlot.prototype.drawItem = function(index) {
     }
 };
 
-
 Window_EquipStatus.prototype.windowWidth = function() {
 //    return 312;
     return 252;
 };
-
 
 Window_EquipStatus.prototype.drawParamName = function(x, y, paramId) {
     this.changeTextColor(this.systemColor());
@@ -270,12 +280,8 @@ Window_EquipStatus.prototype.drawNewParam = function(x, y, paramId) {
     this.drawText(newValue, x - 40, y, 48, 'right');
 };
 
-// -----------------------------------------------
+//------------------------------------------------
 // Status
-// -----------------------------------------------
-
-var myParam = 6;
-var myEquip = 5;
 
 Window_Status.prototype.refresh = function() {
     this.contents.clear();
@@ -284,12 +290,12 @@ Window_Status.prototype.refresh = function() {
         this.drawBlock1(lineHeight * 0);
         this.drawHorzLine(lineHeight * 2);
         this.drawBlock2(lineHeight * 3);
-        this.drawHorzLine(lineHeight * 7);
-        this.drawBlockExp(lineHeight * 8);
-        this.drawHorzLine(lineHeight * 10);
-        this.drawBlock3(lineHeight * 11);
-        this.drawHorzLine(lineHeight * (11 + Math.max(myParam, myEquip)));
-        this.drawBlock4(lineHeight * (12 + Math.max(myParam, myEquip)));
+        this.drawHorzLine(lineHeight * 8);
+        this.drawBlockExp(lineHeight * 9);
+        this.drawHorzLine(lineHeight * 11);
+        this.drawBlock3(lineHeight * 12);
+        this.drawHorzLine(lineHeight * (12 + Math.max(paramCount, equipCount)));
+        this.drawBlock4(lineHeight * (13 + Math.max(paramCount, equipCount)));
     }
 };
 
@@ -348,20 +354,19 @@ Window_Status.prototype.drawBlock4 = function(y) {
     this.drawProfile(6, y);
 };
 
-
 Window_Status.prototype.drawBasicInfo = function(x, y) {
     var lineHeight = this.lineHeight();
     this.drawActorLevel(this._actor, x, y + lineHeight * 0);
-    this.drawActorIcons(this._actor, x, y + lineHeight * 0);
-    this.drawActorHp(this._actor, x, y + lineHeight * 1);
-    this.drawActorMp(this._actor, x, y + lineHeight * 2);
-    this.drawActorTp(this._actor, x, y + lineHeight * 3, 186);
+    this.drawActorIcons(this._actor, x, y + lineHeight * 1);
+    this.drawActorHp(this._actor, x, y + lineHeight * 2);
+    this.drawActorMp(this._actor, x, y + lineHeight * 3);
+    if ($dataSystem.optDisplayTp) {
+        this.drawActorTp(this._actor, x, y + lineHeight * 4, 186);
+    }
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // OtherMenu
-// -----------------------------------------------
 
 Window_Options.prototype.lineHeight = function() {
     return 36 + 30;
@@ -371,10 +376,8 @@ Window_GameEnd.prototype.lineHeight = function() {
     return 36 + 30;
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Event
-// -----------------------------------------------
 
 Window_NumberInput.prototype.lineHeight = function () {
     return 94;
@@ -400,7 +403,6 @@ Window_NumberInput.prototype.placeButtons = function () {
     }
 };
 
-
 Window_Base.prototype.drawItemName = function (item, x, y, width) {
     width = width || 312;
     if (item) {
@@ -420,7 +422,6 @@ Window_EventItem.prototype.standardPadding = function() {
     return 18 + 24;
 };
 
-
 Window_ChoiceList.prototype.lineHeight = function () {
     return 36 + 30;
 };
@@ -430,10 +431,8 @@ Window_ChoiceList.prototype.drawItem = function (index) {
     this.drawTextEx(this.commandName(index), rect.x, rect.y + (this.lineHeight() / 4));
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Shop
-// -----------------------------------------------
 
 Window_ShopCommand.prototype.lineHeight = function() {
     return 36 + 20;
@@ -447,7 +446,6 @@ Window_ShopBuy.prototype.standardPadding = function() {
     return 18 + 24;
 };
 
-
 Window_ShopSell.prototype.lineHeight = function () {
     return 36 + 30;
 };
@@ -456,15 +454,12 @@ Window_ShopSell.prototype.standardPadding = function() {
     return 18 + 24;
 };
 
-
 Window_ShopBuy.prototype.windowWidth = function() {
-//    return 456;
     return Graphics.width - 240;
 };
 
 
 Window_ShopNumber.prototype.windowWidth = function() {
-//    return 456;
     return Graphics.width - 240;
 };
 
@@ -489,12 +484,10 @@ Window_ShopNumber.prototype.placeButtons = function() {
 };
 
 Window_ShopNumber.prototype.itemY = function() {
-//    return Math.round(this.contentsHeight() / 2 - this.lineHeight() * 1.5);
     return Math.round(this.contentsHeight() / 2 - this.lineHeight() * 4);
 };
 
 Window_ShopNumber.prototype.priceY = function() {
-//    return Math.round(this.contentsHeight() / 2 + this.lineHeight() / 2);
     return Math.round(this.contentsHeight() / 2 - this.lineHeight() * 2);
 };
 
@@ -516,10 +509,8 @@ Window_ShopStatus.prototype.drawActorEquipInfo = function(x, y, actor) {
     this.changePaintOpacity(true);
 };
 
-
-// -----------------------------------------------
+//------------------------------------------------
 // Battle
-// -----------------------------------------------
 
 Window_BattleEnemy.prototype.lineHeight = function() {
     return 36 + 36;
@@ -556,7 +547,6 @@ Window_BattleEnemy.prototype.initialize = function(x, y) {
     this.hide();
 };
 
-
 Window_BattleActor.prototype.lineHeight = function() {
     return (this.windowHeight() / 4) - 16;
 };
@@ -572,7 +562,6 @@ Window_BattleActor.prototype.windowHeight = function() {
 Window_BattleActor.prototype.initialize = function(x, y) {
     Window_BattleStatus.prototype.initialize.call(this);
     this.x = x;
-//    this.y = y - 145;
     this.y = Window_ActorCommand.prototype.windowHeight();
     this.openness = 255;
     this.hide();
@@ -581,7 +570,6 @@ Window_BattleActor.prototype.initialize = function(x, y) {
 Window_BattleActor.prototype.drawItem = function(index) {
     var actor = $gameParty.battleMembers()[index];
     this.drawBasicArea(this.basicAreaRect(index), actor);
-//    this.drawGaugeArea(this.gaugeAreaRect(index), actor);
 };
 
 Window_BattleActor.prototype.basicAreaRect = function(index) {
@@ -592,9 +580,7 @@ Window_BattleActor.prototype.basicAreaRect = function(index) {
 
 Window_BattleActor.prototype.drawBasicArea = function(rect, actor) {
     this.drawActorName(actor, rect.x + 0, rect.y, rect.width);
-//    this.drawActorIcons(actor, rect.x + 156, rect.y, rect.width - 156);
 };
-
 
 Window_BattleSkill.prototype.lineHeight = function() {
     return 36 + 36;
@@ -611,7 +597,6 @@ Window_BattleItem.prototype.lineHeight = function() {
 Window_BattleItem.prototype.standardPadding = function() {
     return 18 + 24;
 };
-
 
 Window_PartyCommand.prototype.initialize = function() {
     var y = Graphics.boxHeight - this.windowHeight();
@@ -657,7 +642,7 @@ Window_ActorCommand.prototype.maxCols = function() {
 };
 
 Window_ActorCommand.prototype.numVisibleRows = function() {
-    return 2;
+    return actorCommandRows;
 };
 
 Window_BattleStatus.prototype.initialize = function() {
@@ -671,26 +656,23 @@ Window_BattleStatus.prototype.initialize = function() {
 };
 
 Window_BattleStatus.prototype.drawBasicArea = function(rect, actor) {
-// default
-//    this.drawActorName(actor, rect.x + 0, rect.y, 150);
-//    this.drawActorIcons(actor, rect.x + 156, rect.y, rect.width - 156);
     this.drawActorName(actor, rect.x + 0, rect.y, 170);
     this.drawActorIcons(actor, rect.x + 176, rect.y, rect.width - 156 + 20);
 };
 
 Window_BattleStatus.prototype.gaugeAreaWidth = function() {
-//    return 330;
     return 280;
 };
 
 Window_BattleStatus.prototype.drawGaugeAreaWithTp = function(rect, actor) {
-// default
-//    this.drawActorHp(actor, rect.x + 0, rect.y, 108);
-//    this.drawActorMp(actor, rect.x + 123, rect.y, 96);
-//    this.drawActorTp(actor, rect.x + 234, rect.y, 96);
     this.drawActorHp(actor, rect.x + 16, rect.y, 108 - 16);
     this.drawActorMp(actor, rect.x + 123, rect.y, 96 - 20);
     this.drawActorTp(actor, rect.x + 234 - 25, rect.y, 96 - 25);
+};
+
+Window_BattleStatus.prototype.drawGaugeAreaWithoutTp = function(rect, actor) {
+    this.drawActorHp(actor, rect.x + 20, rect.y, 201 - 70);
+    this.drawActorMp(actor, rect.x + 216 - 50,  rect.y, 114 - 10);
 };
 
 Window_BattleStatus.prototype.windowWidth = function() {
@@ -698,34 +680,12 @@ Window_BattleStatus.prototype.windowWidth = function() {
 };
 
 Scene_Battle.prototype.updateWindowPositions = function() {
-	/*---------------ここは使わないのでコメントアウト。
-    var statusX = 0;
-    if (BattleManager.isInputting()) {
-        statusX = this._partyCommandWindow.width;
-    } else {
-        statusX = this._partyCommandWindow.width / 2;
-    }
-    if (this._statusWindow.x < statusX) {
-        this._statusWindow.x += 16;
-        if (this._statusWindow.x > statusX) {
-            this._statusWindow.x = statusX;
-        }
-    }
-    if (this._statusWindow.x > statusX) {
-        this._statusWindow.x -= 16;
-        if (this._statusWindow.x < statusX) {
-            this._statusWindow.x = statusX;
-        }
-    }
-    ---------------*/
+	// Don't use.
 };
-
 
 Sprite_Actor.prototype.setActorHome = function(index) {
-//    this.setHome(600 + index * 32, 280 + index * 48);
-    this.setHome(Graphics.boxWidth - 100, 280 + index * (48 + 48));
+    this.setHome(Graphics.boxWidth - 100, 320 + index * (48 + 48));
 };
-
 
 Sprite_Enemy.prototype.setBattler = function(battler) {
     Sprite_Battler.prototype.setBattler.call(this, battler);
@@ -734,14 +694,12 @@ Sprite_Enemy.prototype.setBattler = function(battler) {
     this._stateIconSprite.setup(battler);
 };
 
-
 // -----------------------------------------------
 // Save
-// -----------------------------------------------
 
-var _Scene_File_create = Scene_File.prototype.create;
+var KRD__Scene_File_create = Scene_File.prototype.create;
 Scene_File.prototype.create = function() {
-    _Scene_File_create.call(this);
+    KRD__Scene_File_create.call(this);
     this._listWindow.height = this._listWindow.fittingHeight(7 * 2);
     var x = 0;
     var y = this._listWindow.y + this._listWindow.height;
@@ -754,9 +712,9 @@ Scene_File.prototype.create = function() {
     this.addWindow(this._statusWindow);
 };
 
-var _Scene_File_start = Scene_File.prototype.start;
+var KRD__Scene_File_start = Scene_File.prototype.start;
 Scene_File.prototype.start = function() {
-    _Scene_File_start.call(this);
+    KRD__Scene_File_start.call(this);
     this._listWindow.ensureCursorVisible();
     this._listWindow.callUpdateHelp();
 };
@@ -785,7 +743,6 @@ Window_SavefileList.prototype.standardPadding = function() {
     return 28;
 };
 
-
 Window_SavefileList.prototype.onTouch = function(triggered) {
     var lastIndex = this.index();
     var x = this.canvasToLocalX(TouchInput.x);
@@ -811,11 +768,9 @@ Window_SavefileList.prototype.onTouch = function(triggered) {
     }
 };
 
-
-var _Window_SavefileList_callUpdateHelp =
-        Window_SavefileList.prototype.callUpdateHelp;
+var KRD__Window_SavefileList_callUpdateHelp = Window_SavefileList.prototype.callUpdateHelp;
 Window_SavefileList.prototype.callUpdateHelp = function() {
-    _Window_SavefileList_callUpdateHelp.call(this);
+    KRD__Window_SavefileList_callUpdateHelp.call(this);
     if (this.active && this.statusWindow) {
         this.statusWindow.setId(this.index() + 1);
     }
@@ -891,6 +846,5 @@ Window_SavefileStatus.prototype.drawContents = function(info, rect, valid) {
     }
 };
 
-// -----------------------------------------------
-
+//================================================
 })();
