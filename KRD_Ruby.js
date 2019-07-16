@@ -63,11 +63,20 @@ Window_Base.prototype.processRubyCharacter = function(textState) {
     var base = text[0].slice(1);
     var ruby = text[1].slice(0, -1);
     var w = this.textWidth(base);
-    this.makeFontSmaller();
-    this.contents.drawText(ruby, textState.x, textState.y - textState.height, w, textState.height, 'center');
-    this.makeFontBigger();
+    var size = this.contents.fontSize;
+    this.makeFontSmallerRuby();
+    this.contents.drawText(ruby, textState.x, textState.y - textState.height + 6, w, textState.height, 'center');
+    this.makeFontBiggerRuby(size);
     this.contents.drawText(base, textState.x, textState.y, w * 2, textState.height);
     textState.x += w;
+};
+
+Window_Base.prototype.makeFontBiggerRuby = function(size) {
+    this.contents.fontSize = size;
+};
+
+Window_Base.prototype.makeFontSmallerRuby = function() {
+    this.contents.fontSize = this.standardFontSize() - 10;
 };
 
 //================================================
