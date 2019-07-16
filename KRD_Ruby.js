@@ -7,7 +7,7 @@
 //================================================
 
 /*:
- * @plugindesc Set ruby on message.(20190710)
+ * @plugindesc Set ruby on message.(20190716)
  * @author kuroudo (くろうど)
  * @help [Usage]
  * Write in message. \R[BASE,ruby]
@@ -18,7 +18,7 @@
  */
 
  /*:ja
- * @plugindesc メッセージにルビ（読みがな）を付けます。(20190710)
+ * @plugindesc メッセージにルビ（読みがな）を付けます。(20190716)
  * @author kuroudo (くろうど)
  * @help 【使い方】
  * ルビを振りたいメッセージに \R[漢字,かんじ] のように \R[] で囲って記述します。
