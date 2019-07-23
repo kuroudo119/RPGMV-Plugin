@@ -41,6 +41,7 @@ var KRD_Window_Base_processEscapeCharacter = Window_Base.prototype.processEscape
 Window_Base.prototype.processEscapeCharacter = function(code, textState) {
     switch (code) {
         case 'R':
+        case 'r':
             this.processRubyCharacter(textState);
             break;
         default:
@@ -49,7 +50,7 @@ Window_Base.prototype.processEscapeCharacter = function(code, textState) {
 };
 
 Window_Base.prototype.obtainEscapeParamChar = function(textState) {
-    var arr = /^\[[^,]+?,[^,]+?\]/.exec(textState.text.slice(textState.index));
+    var arr = /^\[[^,]*?,[^,]*?\]/.exec(textState.text.slice(textState.index));
     if (arr) {
         textState.index += arr[0].length;
         return arr[0];
@@ -61,7 +62,7 @@ Window_Base.prototype.obtainEscapeParamChar = function(textState) {
 Window_Base.prototype.processRubyCharacter = function(textState) {
     var text = this.obtainEscapeParamChar(textState).split(',');
     var base = text[0].slice(1);
-    var ruby = text[1].slice(0, -1);
+    var ruby = text.length >= 2 ? text[1].slice(0, -1) : '';
     var w = this.textWidth(base);
     var size = this.contents.fontSize;
     this.makeFontSmallerRuby();
