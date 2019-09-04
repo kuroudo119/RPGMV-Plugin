@@ -16,7 +16,13 @@
  * 
  */
 
-var krdMapStatus = true;
+// krdMapStatus
+// -2 : 非表示継続（更新なし）
+// -1 : 非表示に変更
+//  0 : 表示あり（更新なし）
+//  1 : 表示を更新する
+//  2 : 非表示から再表示する
+var krdMapStatus = 1;
 
 (function() {
 
@@ -41,16 +47,22 @@ Scene_Map.prototype.updateMain = function() {
 };
 
 Scene_Map.prototype.updateStatus = function() {
-    if (krdMapStatus) {
+    if (krdMapStatus === 1) {
         this._statusWindow.refresh();
-        krdMapStatus = false;
+        krdMapStatus = 0;
+    } else if (krdMapStatus === 2) {
+        this._statusWindow.open();
+        krdMapStatus = 1;
+    } else if (krdMapStatus === -1) {
+        this._statusWindow.close();
+        krdMapStatus = -2;
     }
 };
 
 Game_Actor.prototype.checkFloorEffect = function() {
     if ($gamePlayer.isOnDamageFloor()) {
         this.executeFloorDamage();
-        krdMapStatus = true;
+        krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
     }
 };
 
@@ -60,14 +72,14 @@ Game_Actor.prototype.turnEndOnMap = function() {
         if (this.result().hpDamage > 0) {
             this.performMapDamage();
         }
-        krdMapStatus = true;
+        krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
     }
 };
 
 var KRD_BattleManager_endBattle = BattleManager.endBattle;
 BattleManager.endBattle = function(result) {
     KRD_BattleManager_endBattle.call(this, result);
-    krdMapStatus = true;
+    krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
 };
 
 //================================================
@@ -80,7 +92,7 @@ Window_MapStatus.prototype.constructor = Window_MapStatus;
 
 Window_MapStatus.prototype.initialize = function() {
     Window_BattleStatus.prototype.initialize.call(this);
-    krdMapStatus = true;
+    krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
 };
 
 //================================================
