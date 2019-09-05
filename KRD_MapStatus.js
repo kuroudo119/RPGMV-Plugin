@@ -8,21 +8,40 @@
  * @plugindesc Status Window on Map.
  * @author kuroudo (くろうど)
  * 
+ * @param MapStatus
+ * @desc Input Variables Number to Status Window Flags.
+ * @default 1
+ *
+ * @help
+ * - Value in MapStatus
+ * -2 : Nothing (at Close)
+ * -1 : Window Close
+ *  0 : Nothing (at Open)
+ *  1 : Refresh
+ *  2 : Window Open
+ * 
  */
 
 /*:ja
  * @plugindesc マップ画面にステータス（戦闘時と同じ）を表示します。
  * @author kuroudo (くろうど)
  * 
+ * @param MapStatus
+ * @desc ステータス表示に使用する変数番号を入力してください。
+ * @default 1
+ *
+ * @help
+ * ▼MapStatusの変数に入れる値
+ * -2 : 非表示継続（更新なし）
+ * -1 : 非表示に変更
+ *  0 : 表示あり（更新なし）
+ *  1 : 表示を更新する
+ *  2 : 非表示から再表示する
+ * 
  */
 
-// krdMapStatus
-// -2 : 非表示継続（更新なし）
-// -1 : 非表示に変更
-//  0 : 表示あり（更新なし）
-//  1 : 表示を更新する
-//  2 : 非表示から再表示する
-var krdMapStatus = 1;
+var parameters = PluginManager.parameters('KRD_MapStatus');
+var mapStatus = Number(parameters['MapStatus'] || 1);
 
 (function() {
 
@@ -47,22 +66,28 @@ Scene_Map.prototype.updateMain = function() {
 };
 
 Scene_Map.prototype.updateStatus = function() {
+    var krdMapStatus = $gameVariables.value(mapStatus);
     if (krdMapStatus === 1) {
         this._statusWindow.refresh();
         krdMapStatus = 0;
+        $gameVariables.setValue(mapStatus, krdMapStatus);
     } else if (krdMapStatus === 2) {
         this._statusWindow.open();
         krdMapStatus = 1;
+        $gameVariables.setValue(mapStatus, krdMapStatus);
     } else if (krdMapStatus === -1) {
         this._statusWindow.close();
         krdMapStatus = -2;
+        $gameVariables.setValue(mapStatus, krdMapStatus);
     }
 };
 
 Game_Actor.prototype.checkFloorEffect = function() {
     if ($gamePlayer.isOnDamageFloor()) {
         this.executeFloorDamage();
+        var krdMapStatus = $gameVariables.value(mapStatus);
         krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
+        $gameVariables.setValue(mapStatus, krdMapStatus);
     }
 };
 
@@ -72,14 +97,18 @@ Game_Actor.prototype.turnEndOnMap = function() {
         if (this.result().hpDamage > 0) {
             this.performMapDamage();
         }
+        var krdMapStatus = $gameVariables.value(mapStatus);
         krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
+        $gameVariables.setValue(mapStatus, krdMapStatus);
     }
 };
 
 var KRD_BattleManager_endBattle = BattleManager.endBattle;
 BattleManager.endBattle = function(result) {
     KRD_BattleManager_endBattle.call(this, result);
+    var krdMapStatus = $gameVariables.value(mapStatus);
     krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
+    $gameVariables.setValue(mapStatus, krdMapStatus);
 };
 
 //================================================
@@ -92,7 +121,9 @@ Window_MapStatus.prototype.constructor = Window_MapStatus;
 
 Window_MapStatus.prototype.initialize = function() {
     Window_BattleStatus.prototype.initialize.call(this);
+    var krdMapStatus = $gameVariables.value(mapStatus);
     krdMapStatus = krdMapStatus >= 0 ? 1 : -1;
+    $gameVariables.setValue(mapStatus, krdMapStatus);
 };
 
 //================================================
