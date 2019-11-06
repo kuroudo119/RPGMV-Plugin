@@ -177,6 +177,11 @@
  * [Usage Sugoroku Start]
  * Player can't move on Sugoroku Mode Switch is ON.
  * 
+ * If the player wants to move, execute a common event.
+ * The common event is Common_Sugoroku.
+ * 
+ * For that reason, The common event is written to Dice Roll and Player Move.
+ * 
  * [Usege Dice Roll]
  * 1. Set the Roll Type Variable.
  * Value : Roll Type
@@ -192,90 +197,67 @@
  * [Usage Player Move]
  * Set player's move steps by plugin command KRD_setPlayerStep.
  * 
+ * Then, player auto move by terrain tag.
+ * And move stop.
+ * And execute common event by region id.
  * 
- * プラグインコマンド「KRD_setPlayerStep」を使用して、
- * プレイヤーが移動する歩数（マスの数）を設定してください。
- * 
- * そうすると、マスに設定された地形タグに従って自動的に移動します。
- * そして、止まったマスのリージョンIDを元に算出されたコモンイベントを実行します。
- * 
- * 地形タグを設定していないマス、つまり地形タグが 0 のマスは、移動が強制停止し、
- * ゴールイベント（Common_Goal で設定したコモンイベント）が実行されます。
- * 
- * 
+ * When terrain tag is zero that is goal.
+ * Execute common event Common_Goal.
  * 
  * [Usage Rival]
- * 一緒にすごろくをするキャラクターを1体用意する事が出来ます。
- * これをこのプラグインではライバルと呼びます。
+ * Player can sugoroku with a rival.
  * 
- * ライバルを使用する場合、
- * まず、Event_Rival にマップイベントIDを設定します。
- * この値は全マップ共通で使うので 1 を使う事を想定しています。
+ * When using a rival, set event ID for Event_Rival.
  * 
- * ライバルを移動させるには
- * まず、 KRD_startRival を使います。
+ * For rival move, use KRD_startRival.
+ * And use plugin command KRD_setRivalStep.
+ * Then, rival auto move.
  * 
- * そして、プラグインコマンド「KRD_setRivalStep」を使用して、
- * ライバルが移動する歩数（マスの数）を設定してください。
- * そうすると、ライバルが自動的に移動します。
- * ライバルはマスに止まってもイベントが発生しません。
- * 
- * ライバルとの衝突イベントを発生させる場合、
- * Switch_Collision で設定したスイッチを ON にしてください。
- * 
- * 
+ * When Switch_Collision is ON,
+ * when player collision to rival, execute event.
  * 
  * [Step]
- * 歩数は Variable_Result で設定した変数を使用する想定ですが、
- * 必ずしもサイコロを振る必要はなく、値の設定方法は自由です。
+ * Sugoroku step is Variable_Result's value.
  * 
- * 歩数がマイナスの場合、マスの向きと反対方向に移動します。
- * つまり、戻る移動をするわけですが、曲がる事は出来ません。
- * 
- * 戻す先が決まっているなら、移動ルートの設定でジャンプするなどしてください。
+ * When step is minus, player move reverse.
+ * But, player reverse can't turn.
  * 
  * [Plugin Command]
- * 以下はプラグインコマンドのコマンド名です。
- * プラグインコマンドは「コマンド名 パラメータ」という構成で記述します。
- * コマンド名とパラメータの間は半角スペースです。
- * 
  * - KRD_setPlayerStep
- * プレイヤーが移動する歩数を設定します。
- * パラメータは、歩数が入っている変数の番号です。
+ * Set step value for player move.
+ * Parameter is variables number.
  * 
  * - KRD_setPlayerStepValue
- * プレイヤーが移動する歩数を設定します。
- * パラメータは、歩数の値そのものです。
+ * Set step value for player move.
+ * Parameter is step value.
  * 
  * - KRD_setRivalStep
- * ライバルが移動する歩数を設定します。
- * パラメータは、歩数が入っている変数の番号です。
+ * Set step value for rival move.
+ * Parameter is variables number.
  * 
  * - KRD_eraseDice
- * 表示されているサイコロ画像を消します。
- * パラメータはありません。
+ * Erase dice pictures on screen.
+ * Parameter is nothing.
  * 
  * - KRD_initSugoroku
- * そのマップでのすごろく処理を開始します。
- * パラメータはありません。
+ * Start sugoroku in the map.
+ * Parameter is nothing.
  * 
  * - KRD_idleRival
- * ライバルを一時移動停止します。
- * パラメータはありません。
+ * Rival is idling.
+ * Parameter is nothing.
  * 
  * - KRD_startRival
- * ライバルが移動可能な状態にします。
- * パラメータはありません。
+ * Starting the rival move.
+ * Parameter is nothing.
  * 
  * - KRD_stopRival
- * ライバルの移動を終了します。
- * パラメータはありません。
+ * Finish the rival move.
+ * Parameter is nothing.
  * 
  * - KRD_setCanMoveRival
- * ライバルが移動可能な状態なのかチェックしてスイッチをON／OFFします。
- * Switch_CanMoveRival で設定したスイッチが使用されます。
- * パラメータはありません。
- * 
+ * The rival movable is set for the Switch_CanMoveRival.
+ * Parameter is nothing.
  * 
  */
 
@@ -455,6 +437,12 @@
  * 【すごろくの開始について】
  * すごろくモードスイッチが ON の時、プレイヤーは移動が出来なくなります。
  * 
+ * この状態で、プレイヤーが移動しようとした時、
+ * Common_Sugoroku のコモンイベントが実行されます。
+ * ですので、このコモンイベントの中に、
+ * 以下の「サイコロ処理」および「プレイヤーの移動処理」を
+ * 記述してください。
+ * 
  * 【サイコロ処理の使い方】
  * 1. 「サイコロの判定方法に使う変数（Variable_RollType）」に
  * 値を設定してください。
@@ -485,7 +473,7 @@
  *    ：分岐終了
  *   ：以上繰り返し
  * 
- * 【プレイヤーの移動方法】
+ * 【プレイヤーの移動処理】
  * プラグインコマンド「KRD_setPlayerStep」を使用して、
  * プレイヤーが移動する歩数（マスの数）を設定してください。
  * 
