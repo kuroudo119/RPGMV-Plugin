@@ -5,7 +5,7 @@
 // https://opensource.org/licenses/mit-license.php
 
 /*:
- * @plugindesc Sugoroku Plugin version Alpha. 2019/11/03 Update.
+ * @plugindesc Sugoroku Plugin version Alpha. 2019/11/15 Update.
  * @author KRD_DATA (くろうど)
  * 
  * @requiredAssets img/pictures/dice_1
@@ -243,6 +243,10 @@
  * Start sugoroku in the map.
  * Parameter is nothing.
  * 
+ * - KRD_initRival
+ * Initialize rival position.
+ * Parameter is nothing.
+ * 
  * - KRD_idleRival
  * Rival is idling.
  * Parameter is nothing.
@@ -262,7 +266,7 @@
  */
 
 /*:ja
- * @plugindesc すごろくプラグイン。アルファ版。2019/11/03 更新。
+ * @plugindesc すごろくプラグイン。アルファ版。2019/11/15 更新。
  * @author KRD_DATA (くろうど)
  * 
  * @requiredAssets img/pictures/dice_1
@@ -536,6 +540,10 @@
  * そのマップでのすごろく処理を開始します。
  * パラメータはありません。
  * 
+ * - KRD_initRival
+ * ライバルの位置を初期化します。
+ * パラメータはありません。
+ * 
  * - KRD_idleRival
  * ライバルを一時移動停止します。
  * パラメータはありません。
@@ -624,6 +632,9 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
         case 'KRD_initSugoroku':
             $gamePlayer.initSugoroku();
             break;
+        case 'KRD_initRival':
+            $gameMap._events[evRival].initRival();
+            break;
         case 'KRD_idleRival':
             $gameMap._events[evRival].idleRival();
             break;
@@ -634,7 +645,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
             $gameMap._events[evRival].stopRival();
             break;
         case 'KRD_setCanMoveRival':
-            var movable = this.canMoveRival();
+            var movable = $gameMap._events[evRival].canMoveRival();
             $gameSwitches.setValue(swRival, movable);
             break;
     }
@@ -670,7 +681,7 @@ Game_Player.prototype.triggerButtonAction = function() {
 
 Game_Player.prototype.initSugoroku = function(){
     if (evRival > 0) {
-        $gameMap._events[evRival].initRival();
+        $gameMap._events[evRival].loadRival();
     }
 };
 
@@ -929,6 +940,11 @@ Game_Event.prototype.updateStop = function() {
 // Rival Position
 
 Game_Event.prototype.initRival = function(){
+    $gameVariables.setValue(varEventX, 0);
+    $gameVariables.setValue(varEventY, 0);
+};
+
+Game_Event.prototype.loadRival = function(){
     const x = $gameVariables.value(varEventX);
     const y = $gameVariables.value(varEventY);
     if (x != 0 && y != 0) {
@@ -956,9 +972,16 @@ Game_Event.prototype.saveRival = function(){
     $gameVariables.setValue(varEventY, this.y);
 };
 
-Game_Interpreter.prototype.canMoveRival = function(){
-    const rivalStatus = $gameVariables.value(varRival);
-    return rivalStatus === 200;
+Game_Event.prototype.canMoveRival = function(){
+    const x = this.x;
+    const y = this.y;
+    const tag = $gameMap.terrainTag(x, y);
+    if (tag === 0) {
+        return false;
+    } else {
+        const rivalStatus = $gameVariables.value(varRival);
+        return rivalStatus === 200;
+    }
 };
 
 //================================================
