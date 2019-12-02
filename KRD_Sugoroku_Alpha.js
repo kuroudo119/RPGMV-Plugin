@@ -5,7 +5,7 @@
 // https://opensource.org/licenses/mit-license.php
 
 /*:
- * @plugindesc Sugoroku Plugin version Alpha. 2019/11/15 Update.
+ * @plugindesc Sugoroku Plugin version Alpha. 2019/12/02 Update.
  * @author KRD_DATA (くろうど)
  * 
  * @requiredAssets img/pictures/dice_1
@@ -154,6 +154,7 @@
  * Please set dice images into pictures folder.
  * For example the name is dice_1.
  * For example the size is 100px.
+ * Use picture id 1 to 15.
  * 
  * img/pictures/dice_1
  * img/pictures/dice_2
@@ -266,7 +267,7 @@
  */
 
 /*:ja
- * @plugindesc すごろくプラグイン。アルファ版。2019/11/15 更新。
+ * @plugindesc すごろくプラグイン。アルファ版。2019/12/02 更新。
  * @author KRD_DATA (くろうど)
  * 
  * @requiredAssets img/pictures/dice_1
@@ -415,7 +416,7 @@
  * サイコロ画像を pictures フォルダに入れてください。
  * ファイル名は dice_1 から dice_6 としてください。
  * サイコロ画像の画像サイズは一辺が 100 ピクセルの正方形を想定しています。
- * サイコロ処理で、ピクチャID 1～9 を使います。
+ * サイコロ処理で、ピクチャID 1～15 を使います。
  * 
  * img/pictures/dice_1
  * img/pictures/dice_2
@@ -796,30 +797,50 @@ Game_Player.prototype.checkRegion = function(){
 //================================================
 // Dice Roll
 
+const maxDice = 15;
+
 Game_Screen.prototype.rollDice = function(count = 0, max = 1){
     const name = ['dice_1', 'dice_2', 'dice_3', 'dice_4', 'dice_5', 'dice_6'];
+    const d4 = dNext + dHalf;
+    const d5 = dNext + dNext;
     const baseX = [
-                [dx],
-                [dx - dHalf, dx + dHalf],
-                [dx - dNext, dx, dx + dNext],
-                [dx - dNext, dx, dx + dNext, dx],
-                [dx - dNext, dx, dx + dNext, dx - dHalf, dx + dHalf],
-                [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext],
-                [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx],
-                [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx - dHalf, dx + dHalf],
-                [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext]
-            ];
-    const x = baseX[max - 1][count];
-    const y = dy + Math.floor(count / 3) * dNext;
+/* 1*/        [dx]
+/* 2*/      , [dx - dHalf, dx + dHalf]
+/* 3*/      , [dx - dNext, dx, dx + dNext]
+/* 4*/      , [dx - dNext, dx, dx + dNext, dx]
+/* 5*/      , [dx - dNext, dx, dx + dNext, dx - dHalf, dx + dHalf]
+/* 6*/      , [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext]
+/* 7*/      , [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx]
+/* 8*/      , [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx - dHalf, dx + dHalf]
+/* 9*/      , [dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext, dx - dNext, dx, dx + dNext]
+/*10*/      , [dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - dHalf, dx + dHalf]
+/*11*/      , [dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - dNext, dx, dx + dNext]
+/*12*/      , [dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - d4, dx - dHalf, dx + dHalf, dx + d4, dx - d4, dx - dHalf, dx + dHalf, dx + d4]
+/*13*/      , [dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - dNext, dx, dx + dNext]
+/*14*/      , [dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - d4, dx - dHalf, dx + dHalf, dx + d4]
+/*15*/      , [dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - d5, dx - dNext, dx, dx + dNext, dx + d5, dx - d5, dx - dNext, dx, dx + dNext, dx + d5]
+    ];
+    const xx = baseX[max - 1][count];
+    const y3 = dy + Math.floor(count / 3) * dNext;
+    const y4 = dy + Math.floor(count / 4) * dNext;
+    const y5 = dy + Math.floor(count / 5) * dNext;
     const dice = Math.randomInt(6) + 1;
-    //   showPicture(pictureId, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
-    this.showPicture(count + 1, name[dice - 1], 1, x, y, 100, 100, 255, 0);
+    if (max <= 9) {
+        //   showPicture(pictureId, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
+        this.showPicture(count + 1, name[dice - 1], 1, xx, y3, 100, 100, 255, 0);
+    } else if (max <= 12) {
+        //   showPicture(pictureId, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
+        this.showPicture(count + 1, name[dice - 1], 1, xx, y4, 100, 100, 255, 0);
+    } else if (max <= 15) {
+        //   showPicture(pictureId, name, origin, x, y, scaleX, scaleY, opacity, blendMode);
+        this.showPicture(count + 1, name[dice - 1], 1, xx, y5, 100, 100, 255, 0);
+    }
     return dice;
 };
 
 Game_Screen.prototype.rollAllDice = function() {
     $gameVariables.setValue(varResult, 0);
-    const max = Math.min($gameVariables.value(varDice), 9);
+    const max = Math.min($gameVariables.value(varDice), maxDice);
     for (let i = 0; i < max; i++) {
         $gameVariables.setValue(varResult, this.rollDice(i, max) + $gameVariables.value(varResult));
     }
@@ -833,7 +854,7 @@ Game_Screen.prototype.rollD66 = function() {
 
 Game_Screen.prototype.rollUpper = function(border = 3) {
     $gameVariables.setValue(varResult, 0);
-    const max = Math.min($gameVariables.value(varDice), 9);
+    const max = Math.min($gameVariables.value(varDice), maxDice);
     for (let i = 0; i < max; i++) {
         $gameVariables.setValue(varResult,
             this.rollDice(i, max) >= border ? $gameVariables.value(varResult) + 1 : $gameVariables.value(varResult));
@@ -869,7 +890,7 @@ Game_Screen.prototype.updatePictures = function() {
 };
 
 Game_Screen.prototype.eraseDice = function() {
-    const max = Math.min($gameVariables.value(varDice), 9);
+    const max = Math.min($gameVariables.value(varDice), maxDice);
     for (let i = 1; i <= max; i++) {
         const realPictureId = this.realPictureId(i);
         this._pictures[realPictureId] = null;
