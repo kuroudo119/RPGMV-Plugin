@@ -2,6 +2,11 @@
 
 - RPGツクールMVのプラグイン置き場
 
+## KRD_WeaponArmorList.js 「武器防具リストプラグイン」
+
+アイテムリストの「武器」欄に防具も表示します。
+ただし、「防具」欄は消えません。
+
 ## KRD_AndroidMain.js 「Androidバックキープラグイン」
 
 - Androidアプリ化する時に使います。
