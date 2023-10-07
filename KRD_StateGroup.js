@@ -71,6 +71,7 @@ TagState ステート側に記述した任意のタグです。
 - ver.0.0.1 (2023/10/06) 作成開始
 - ver.0.1.0 (2023/10/07) 関数版完成
 - ver.1.0.0 (2023/10/07) 公開
+- ver.1.1.0 (2023/10/07) 発動ポイント最大のステート付与に修正
 
  * 
  * 
@@ -130,9 +131,10 @@ Game_Actor.prototype.addAllStateGroup = function(tagPoint = TAG_POINT, tagState 
 };
 
 Game_Actor.prototype.addStateGroup = function(groupName, armorPoint, stateGroupData) {
-	const found = stateGroupData.find(data => data.tag[groupName] <= armorPoint);
-	if (found) {
-		this.addState(found.id);
+	const filtered = stateGroupData.filter(data => data.tag[groupName] <= armorPoint);
+	filtered.sort((a, b) => b.tag[groupName] - a.tag[groupName]);
+	if (filtered.length > 0) {
+		this.addState(filtered[0].id);
 	}
 };
 
